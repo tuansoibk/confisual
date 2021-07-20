@@ -88,7 +88,7 @@ public class Parser {
     for (Element entry : entryElements) {
       String method = entry.getAttributeValue("method");
       String authStateName = entry.getAttributeValue("state");
-      String selector = entry.getAttributeValue("selector");
+      String selector = entry.getAttributeValue("selector") != null ? entry.getAttributeValue("selector") : "/" ;
       entries.add(new Entry(method, authStateName, selector));
     }
 
