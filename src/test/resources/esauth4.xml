@@ -1,0 +1,376 @@
+<?xml version="1.0"?>
+<!DOCTYPE esauth-server SYSTEM "/var/opt/nevisauth/default/conf/esauth4.dtd">
+
+<esauth-server instance="I1">
+
+	<SessionCoordinator name="SessionCoordinator" mode="default">
+
+		<SessionCache name="SessionCache"
+					  size="100000"
+					  initialInactivityTimeout="300"
+					  inactivityTimeout="43200"
+					  maxLifetime="43200"
+					  failSafe="false">
+		</SessionCache>
+
+		<TokenAssembler name="DefaultTokenAssembler">
+			<Selector default="true"/>
+			<TokenSpec version="CSSO-1.0" ttl="7200" useGmt="true" algorithm="SHA256withRSA">
+				<field src="session" key="ch.nevis.session.sessid" as="sessid"/>
+				<field src="session" key="ch.nevis.session.userid" as="userid"/>
+				<field src="session" key="ch.nevis.session.authlevel" as="authLevel"/>
+				<field src="session" key="ch.nevis.session.esauthid" as="esauthid"/>
+				<field src="session" key="ch.nevis.session.entryid" as="entryid"/>
+				<field src="session" key="ch.nevis.session.loginid" as="loginId"/>
+				<field src="session" key="ch.nevis.session.domain" as="domain"/>
+				<field src="session" key="ch.nevis.session.secroles" as="roles"/>
+
+
+			</TokenSpec>
+			<Signer key="DefaultSigner"/>
+		</TokenAssembler>
+
+		<KeyStore name="DefaultKeyStore">
+			<KeyObject id="DefaultSigner"
+					   certificate="@AUTH_SIGNER_KEYSTORE@?alias=authsigner"
+					   privateKey="@AUTH_SIGNER_KEYSTORE@?alias=authsigner"
+					   passPhrase="@AUTH_SIGNER_PASSPHRASE@"
+			/>
+		</KeyStore>
+	</SessionCoordinator>
+
+
+	<AuthEngine name="AuthEngine"
+				classPath="/var/opt/nevisauth/default/plugin:/opt/nevisauth/plugin:/opt/nevisidmcl/nevisauth/lib/"
+				classLoadStrategy="PARENT_FIRST"
+				useLiteralDictionary="true"
+				addAutheLevelToSecRoles="true"
+				compatLevel="none"
+				inputLanguageCookie="LANG"
+	>
+		<Domain name="TWOFASSO" default="false"
+				reauthInterval="0"
+				inactiveInterval="7200">
+			<Entry method="authenticate" state="IdmUserIdPasswordLogin"/>
+			<Entry method="stepup" state="TANAuthentication" selector="/2fa/mailtan"/>
+			<Entry method="stepup" state="OATHAuthentication" selector="/2fa/oath/"/>
+			<Entry method="stepup" state="TANAuthentication" selector="/protected/mailtan"/>
+			<Entry method="stepup" state="OATHAuthentication" selector="/protected/oath/"/>
+		</Domain>
+		<!--
+		============================================================================================================
+									   TWOFASSO
+		============================================================================================================
+		-->
+
+		<!-- Begin Idm States -->
+		<AuthState name="IdmUserIdPasswordLogin" final="false"
+				   class="ch.nevis.idm.authstate.IdmPasswordVerifyState">
+			<ResultCond name="ok" next="IdmPostProcessing" authLevel="auth.weak"/>
+			<ResultCond name="pwChange" next="IdmPasswordChange" authLevel="auth.weak"/>
+			<ResultCond name="lockWarn" next="IdmUserIdPasswordLogin"/>
+			<ResultCond name="nowLocked" next="IdmUserIdPasswordLogin"/>
+			<ResultCond name="locked" next="IdmUserIdPasswordLogin"/>
+			<ResultCond name="tmpLocked" next="IdmUserIdPasswordLogin"/>
+			<ResultCond name="failed" next="IdmUserIdPasswordLogin"/>
+			<ResultCond name="clientNotFound" next="IdmUserIdPasswordLogin"/>
+			<ResultCond name="disabled" next="IdmUserIdPasswordLogin"/>
+			<Response value="AUTH_CONTINUE">
+				<Gui name="AuthUidPwDialog" label="login.uidpw.label">
+					<GuiElem name="lasterror" type="error" label="${notes:lasterrorinfo}" value="${notes:lasterror}"/>
+					<GuiElem name="isiwebuserid" type="text" label="userid.label" value="${notes:loginid}"/>
+					<GuiElem name="isiwebpasswd" type="pw-text" label="password.label"/>
+					<GuiElem name="submit" type="submit" label="submit.button.label" value="Login"/>
+				</Gui>
+			</Response>
+			<property name="credential.type" value="password"/>
+			<property name="login.service.connection.1"
+					  value="https://@HOSTNAME@:8989/nevisidm/services/v1/LoginService"/>
+			<property name="admin.service.connection.1"
+					  value="https://@HOSTNAME@:8989/nevisidm/services/v1/AdminService"/>
+		</AuthState>
+
+		<AuthState name="IdmPasswordChange" class="ch.nevis.idm.authstate.IdmChangePasswordState" final="false">
+			<ResultCond name="ok" next="IdmPostProcessing" authLevel="auth.weak"/>
+			<ResultCond name="default" next="IdmPasswordChange"/>
+			<Response value="AUTH_CONTINUE">
+				<Gui name="AuthUidPwDialog" label="login.pwchange.label">
+					<GuiElem name="lasterror" type="error" label="${notes:lasterrorinfo}" value="${notes:lasterror}"/>
+					<GuiElem name="lastmsg" type="info" label="${notes:policyInfo}"/>
+					<GuiElem name="fail" type="error" label="${notes:policyViolations}"/>
+					<GuiElem name="isiwebpasswd" type="pw-text" label="password.label"/>
+					<GuiElem name="isiwebnewpw1" type="pw-text" label="newpassword.label"/>
+					<GuiElem name="isiwebnewpw2" type="pw-text" label="newpassword.label"/>
+					<GuiElem name="submit" type="submit" label="submit.button.label" value="Reset"/>
+				</Gui>
+			</Response>
+			<property name="legacyLitDictMode" value="true"/>
+		</AuthState>
+
+		<AuthState name="IdmPostProcessing" final="false" class="ch.nevis.idm.authstate.IdmGetPropertiesState">
+			<ResultCond name="ok" next="TransformAttributes"/>
+			<ResultCond name="showGui" next="IdmPostProcessing"/>
+			<ResultCond name="SOAP:showGui" next="AuthDone"/>
+			<ResultCond name="default" next="AuthDone"/>
+			<Response value="AUTH_CONTINUE">
+				<Gui name="AuthProfileSelectionDialog">
+					<GuiElem name="lasterror" type="error" label="${notes:lasterrorinfo}" value="${notes:lasterror}"/>
+				</Gui>
+			</Response>
+			<property name="user.attributes" value="email"/>
+		</AuthState>
+
+		<AuthState name="TransformAttributes" class="ch.nevis.esauth.auth.states.standard.TransformAttributes"
+				   final="false">
+			<ResultCond name="default" next="AuthDone"/>
+			<Response value="AUTH_CONTINUE"/>
+			<property name="sess:email" value="${sess:ch.nevis.idm.User.email}"/>
+		</AuthState>
+
+		<!-- Begin TAN state -->
+		<AuthState name="TANAuthentication" class="ch.nevis.esauth.auth.states.tan.TANState">
+			<ResultCond name="ok" next="AuthDone" authLevel="auth.strong"/>
+			<ResultCond name="failed" next="AuthError"/>
+			<ResultCond name="sendFailed" next="AuthError"/>
+			<Response value="AUTH_CONTINUE">
+				<Gui name="MTANDialog" label="Mobile Token">
+					<GuiElem name="lasterror" type="error" label="${notes:lasterrorinfo}" value="${notes:lasterror}"/>
+					<GuiElem name="info" type="info" label="${notes:tan.message}" value="${notes:tan.message}"/>
+					<GuiElem name="tanresponse" type="text" label="Response"/>
+					<GuiElem name="submit" type="button" label="Submit" value="Login"/>
+					<GuiElem name="generate" type="button" label="tan.generate" value="true"/>
+				</Gui>
+			</Response>
+			<property name="response" value="${inargs:tanresponse}"/>
+			<property name="sender" value="noreply"/>
+			<property name="recipient" value="${sess:email} "/>
+			<property name="smtpHost" value="@HOSTNAME@"/>
+			<property name="smtpPort" value="3025"/>
+			<property name="messageTemplate" value="${sess:mtan.challenge}"/>
+			<property name="generateNewTAN" value="${inargs:generate}"/>
+			<property name="maxRetry" value="1"/>
+			<property name="maxRegenerate" value="1"/>
+			<property name="tanTemplate" value="8{ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789}"/>
+			<property name="smtpSubject" value="tan.smtpSubject"/>
+		</AuthState>
+
+		<!-- Begin OATH states -->
+		<AuthState name="OATHCertificateWhiteList" class="ch.nevis.idm.authstate.IdmX509State"
+				   final="false" resumeState="true">
+			<ResultCond name="ok" next="OATHPostProcessingStrong"/>
+			<ResultCond name="chooseClient" next="OATHCertificateWhiteList"/>
+			<ResultCond name="wrongClient" next="OATHUserIdPasswordLogin" startOver="true"/>
+			<ResultCond name="failed" next="OATHUserIdPasswordLogin" startOver="true"/>
+			<Response value="AUTH_CONTINUE">
+				<Gui label="login.cert.label" name="AuthChooseClientDialog">
+					<GuiElem label="${notes.lasterrorinfo}" name="lasterror"
+							 optional="false" type="error" value="${notes.lasterror}"/>
+					<GuiElem label="error_11" name="info"
+							 optional="false" type="info" value=""/>
+				</Gui>
+			</Response>
+			<property name="client.name" value=""/>
+		</AuthState>
+
+		<AuthState name="OATHAuthentication" class="ch.nevis.idm.authstate.IdmCreateCredentialState"
+				   classLoadStrategy="PARENT_FIRST" final="false" resumeState="true">
+			<ResultCond name="ok" next="OATHSetCredentialLabel"/>
+			<ResultCond name="failed" next="OATHFailedToCreateOATH"/>
+			<ResultCond name="credentialExists" next="OATHExists"/>
+			<Response value="AUTH_CONTINUE">
+				<Gui label="Create OATH Credential" name="CreateOATHDialog">
+					<GuiElem label="${notes:lasterrorinfo}" name="lasterror"
+							 optional="false" type="error" value="${notes:lasterror}"/>
+					<GuiElem label="continue.button.label" name="submit"
+							 optional="false" type="submit" value=""/>
+				</Gui>
+			</Response>
+			<property name="cred.context" value="Default"/>
+			<property name="cred.type" value="OATH"/>
+			<property name="operationIfExists" value="ADD"/>
+		</AuthState>
+
+		<AuthState name="OATHSetCredentialLabel" class="ch.nevis.esauth.auth.states.standard.TransformAttributes"
+				   final="false" resumeState="true">
+			<ResultCond name="default" next="OATHShare"/>
+			<Response value="AUTH_CONTINUE"/>
+			<property name="createSession" value="true"/>
+			<property name="session:credlabel" value="Default"/>
+			<property name="session:oath.credential.id" value="${outargs:credential.id}"/>
+		</AuthState>
+
+		<AuthState name="OATHFailedToCreateOATH" class="ch.nevis.esauth.auth.states.standard.AuthGeneric"
+				   classLoadStrategy="PARENT_FIRST" final="true" resumeState="true">
+			<ResultCond name="default" next="OATHActivationFailedRedirect" startOver="true"/>
+			<Response value="AUTH_ERROR">
+				<Gui name="AuthenticationFailedDialog">
+					<GuiElem label="An error happened during creation of the OATH credential." name="infotext"
+							 optional="false" type="info"
+							 value=""/>
+					<GuiElem label="${notes.lasterrorinfo}" name="lasterror"
+							 optional="false" type="error"
+							 value="${notes.lasterror}"/>
+					<GuiElem label="continue.button.label" name="submit"
+							 optional="false" type="submit"
+							 value=""/>
+				</Gui>
+			</Response>
+		</AuthState>
+
+		<AuthState name="OATHExists" class="ch.nevis.esauth.auth.states.standard.AuthGeneric"
+				   classLoadStrategy="PARENT_FIRST" final="true" resumeState="true">
+			<ResultCond name="default" next="OATHVerifyOATH" startOver="true"/>
+			<Response value="AUTH_CONTINUE">
+				<Gui name="AuthenticationFailedDialog">
+					<GuiElem label="OATH credential already exists" name="infotext" optional="false"
+							 type="info" value=""/>
+					<GuiElem label="${notes.lasterrorinfo}" name="lasterror"
+							 optional="false" type="error"
+							 value="${notes.lasterror}"/>
+					<GuiElem label="continue.button.label" name="submit"
+							 optional="false" type="submit"
+							 value=""/>
+				</Gui>
+			</Response>
+		</AuthState>
+
+		<AuthState name="OATHUserIdPasswordLogin" authLevel="auth.weak"
+				   class="ch.nevis.idm.authstate.IdmPasswordVerifyState" final="true"
+				   resumeState="true">
+			<ResultCond name="ok" next="OATHAuthentication"/>
+			<ResultCond name="pwChange" next="IdmPasswordChange"/>
+			<ResultCond name="lockWarn" next="OATHUserIdPasswordLogin"/>
+			<ResultCond name="nowLocked" next="OATHUserIdPasswordLogin"/>
+			<ResultCond name="locked" next="OATHUserIdPasswordLogin"/>
+			<ResultCond name="tmpLocked" next="OATHUserIdPasswordLogin"/>
+			<ResultCond name="failed" next="OATHUserIdPasswordLogin"/>
+			<ResultCond name="clientNotFound" next="OATHUserIdPasswordLogin"/>
+			<Response value="AUTH_CONTINUE">
+				<Gui label="login.uidpw.label" name="AuthUidPwDialog">
+					<GuiElem label="${notes.lasterrorinfo}" name="lasterror"
+							 optional="false" type="error"
+							 value="${notes.lasterror}"/>
+					<GuiElem label="userid.label" name="isiwebuserid"
+							 optional="false" type="text"
+							 value="${notes.loginid}"/>
+					<GuiElem label="password.label" name="isiwebpasswd"
+							 optional="false" type="pw-text"
+							 value=""/>
+					<GuiElem label="submit.button.label" name="submit"
+							 optional="false" type="submit"
+							 value="Login"/>
+				</Gui>
+			</Response>
+			<propertyRef name="OATHCertificateWhiteList"/>
+			<property name="ticket" value="false"/>
+		</AuthState>
+
+		<AuthState name="OATHShare" class="ch.nevis.idm.authstate.IdmShareOTPState"
+				   final="false" resumeState="true">
+			<ResultCond name="ok" next="OATHVerifyOATH"/>
+			<ResultCond name="failied" next="AuthError"/>
+			<ResultCond name="showGui" next="OATHShare"/>
+			<ResultCond name="noCredential" next="AuthError"/>
+			<ResultCond name="secretAlreadyShared" next="OATHVerifyOATH"/>
+			<ResultCond name="default" next="OATHShare"/>
+			<Response value="AUTH_CONTINUE">
+				<Gui name="OATHGui">
+					<GuiElem label="${notes:lasterrorinfo}" name="lasterror"
+							 optional="false" type="error"
+							 value="${notes:lasterror}"/>
+					<GuiElem label="" name="qrcodeimage"
+							 optional="false" type="image"
+							 value="${notes:oath_qrcode}"/>
+					<GuiElem label="continue.button.label" name="result"
+							 optional="false" type="button"
+							 value=""/>
+				</Gui>
+			</Response>
+			<property name="credential.id" value="${session:oath.credential.id}"/>
+		</AuthState>
+
+		<AuthState name="OATHActivationFailedRedirect" class="ch.nevis.esauth.auth.states.standard.AuthRedirect"
+				   final="false" resumeState="true">
+			<Response value="AUTH_REDIRECT">
+				<Gui name="AuthErrorDialog">
+					<GuiElem label="${notes.lasterrorinfo}" name="lasterror"
+							 optional="false" type="error"
+							 value="${notes.lasterror}"/>
+					<GuiElem label="continue.button.label" name="continue"
+							 optional="false" type="submit"
+							 value="continue"/>
+				</Gui>
+			</Response>
+			<property name="restart" value="true"/>
+			<property name="URL" value="/2fa/oath/"/>
+		</AuthState>
+
+		<AuthState name="OATHVerifyOATH" class="ch.nevis.idm.authstate.IdmOTPState"
+				   final="false" resumeState="true">
+			<ResultCond name="default" next="OATHVerifyOATH"/>
+			<ResultCond name="failed" next="OATHVerifyOATH"/>
+			<ResultCond name="ok" next="OATHPostProcessingStrong"/>
+			<ResultCond name="locked" next="AuthError"/>
+			<Response value="AUTH_CONTINUE">
+				<Gui name="OATHLoginDialog">
+					<GuiElem label="${notes.lasterrorinfo}" name="lasterror"
+							 optional="false" type="error"
+							 value="${notes.lasterror}"/>
+					<GuiElem escapeXSS="true" label="Next OTP"
+							 name="response" optional="false" type="text"
+							 value=""/>
+					<GuiElem label="Login" name="submit"
+							 optional="false" type="submit"
+							 value=""/>
+				</Gui>
+			</Response>
+			<propertyRef name="OATHCertificateWhiteList"/>
+			<property name="credential.label" value="${sess:credlabel}"/>
+			<property name="credential.type" value="OATH"/>
+		</AuthState>
+
+		<AuthState name="OATHPostProcessingStrong" authLevel="auth.strong"
+				   class="ch.nevis.idm.authstate.IdmGetPropertiesState" final="false"
+				   resumeState="true">
+			<ResultCond name="ok" next="AuthDone"/>
+			<ResultCond name="showGui" next="OATHPostProcessingStrong"/>
+			<Response value="AUTH_DONE">
+				<Gui name="AuthProfileSelectionDialog">
+					<GuiElem label="${notes.lasterrorinfo}" name="lasterror"
+							 optional="false" type="error"
+							 value="${notes.lasterror}"/>
+				</Gui>
+			</Response>
+			<propertyRef name="OATHCertificateWhiteList"/>
+		</AuthState>
+
+		<!--
+		============================================================================================================
+											   General
+		============================================================================================================
+		-->
+
+		<!-- general success -->
+		<AuthState name="AuthDone" class="ch.nevis.esauth.auth.states.standard.AuthDone">
+			<Response value="AUTH_DONE">
+				<Gui name="AuthDoneDialog"/>
+			</Response>
+		</AuthState>
+
+		<AuthState name="AuthError" class="ch.nevis.esauth.auth.states.standard.AuthError">
+			<Response value="AUTH_ERROR">
+				<Gui encryption="" name="CertAuthErrorDialog">
+					<GuiElem label="${notes:lasterrorinfo}" name="lasterror" optional="false" type="error"
+							 value="${notes:lasterror}"/>
+				</Gui>
+			</Response>
+		</AuthState>
+
+	</AuthEngine>
+
+
+	<!-- auditing channels -->
+	<AuditService class="ch.nevis.esauth.util.audit.JcanChannel"/>
+
+
+</esauth-server>
