@@ -3,8 +3,6 @@ package org.cp.confisual.nevisauth;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.cp.confisual.plantuml.NevisAuthObject;
-import org.cp.confisual.plantuml.NevisAuthVisitor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +12,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Getter
 @EqualsAndHashCode
-public class Domain implements NevisAuthObject {
+public class Domain implements VisitableConfigObject {
 
   private final String name;
   private final Map<String, AuthState> authStates = new HashMap<>();
@@ -29,9 +27,8 @@ public class Domain implements NevisAuthObject {
   }
 
   @Override
-  public void accept(NevisAuthVisitor nevisAuthVisitor) {
-    nevisAuthVisitor.visit(this);
-    Entry.existingAuthStates.clear();
-    this.getEntries().forEach(entry -> entry.accept(nevisAuthVisitor));
+  public void accept(NevisAuthConfigVisitor nevisAuthConfigVisitor) {
+    nevisAuthConfigVisitor.visit(this);
+    this.getEntries().forEach(entry -> entry.getAuthState().accept(nevisAuthConfigVisitor));
   }
 }

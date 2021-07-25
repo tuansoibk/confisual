@@ -5,13 +5,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.cp.confisual.nevisauth.AuthState;
 import org.cp.confisual.nevisauth.Domain;
 import org.cp.confisual.nevisauth.Entry;
+import org.cp.confisual.nevisauth.PlantUmlVisitor;
 import org.cp.confisual.nevisauth.Transition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class NevisAuthVisitorImplTest {
+class PlantUmlVisitorTest {
 
-	NevisAuthVisitorImpl underTest;
+	PlantUmlVisitor underTest;
 
 	// supporting objects
 	private AuthState authState;
@@ -20,8 +21,9 @@ class NevisAuthVisitorImplTest {
 
 	@BeforeEach
 	public void setUp() {
-		underTest = new NevisAuthVisitorImpl();
+		underTest = new PlantUmlVisitor();
 		setUpTestData();
+		AuthState.existingAuthStates.clear();
 	}
 
 	private void setUpTestData() {
@@ -44,22 +46,10 @@ class NevisAuthVisitorImplTest {
 		this.authState.accept(underTest);
 
 		// when
-		String info = underTest.getInfo();
-		assertTrue(info.contains("TestState"));
-		assertTrue(info.contains("ok"));
-	}
-
-	@Test
-	public void canVisitEntry() {
-		// then
-		this.entry.accept(underTest);
-
-		// when
-		String info = underTest.getInfo();
-		assertTrue(info.contains("TestState"));
-		assertTrue(info.contains("authenticate"));
-		assertTrue(info.contains("/Test"));
-		assertTrue(info.contains("Done"));
+		String plantUmlSource = underTest.getPlantumlSource();
+		assertTrue(plantUmlSource.contains("TestState"));
+		assertTrue(plantUmlSource.contains("ok"));
+		assertTrue(plantUmlSource.contains("Done"));
 	}
 
 	@Test
@@ -68,8 +58,12 @@ class NevisAuthVisitorImplTest {
 		this.domain.accept(underTest);
 
 		// when
-		String info = underTest.getInfo();
-		assertTrue(info.contains("authenticate"));
-		assertTrue(info.contains("TestDomain"));
+		String plantUmlSource = underTest.getPlantumlSource();
+		assertTrue(plantUmlSource.contains("TestDomain"));
+		assertTrue(plantUmlSource.contains("authenticate"));
+		assertTrue(plantUmlSource.contains("/Test"));
+		assertTrue(plantUmlSource.contains("TestState"));
+		assertTrue(plantUmlSource.contains("ok"));
+		assertTrue(plantUmlSource.contains("Done"));
 	}
 }
