@@ -23,7 +23,6 @@ class PlantUmlVisitorTest {
 	public void setUp() {
 		underTest = new PlantUmlVisitor();
 		setUpTestData();
-		AuthState.existingAuthStates.clear();
 	}
 
 	private void setUpTestData() {
@@ -46,7 +45,7 @@ class PlantUmlVisitorTest {
 		this.authState.accept(underTest);
 
 		// when
-		String plantUmlSource = underTest.getPlantumlSource();
+		String plantUmlSource = underTest.getSourceBuilder();
 		assertTrue(plantUmlSource.contains("TestState"));
 		assertTrue(plantUmlSource.contains("ok"));
 		assertTrue(plantUmlSource.contains("Done"));
@@ -58,7 +57,7 @@ class PlantUmlVisitorTest {
 		this.domain.accept(underTest);
 
 		// when
-		String plantUmlSource = underTest.getPlantumlSource();
+		String plantUmlSource = underTest.getSourceBuilder();
 		assertTrue(plantUmlSource.contains("TestDomain"));
 		assertTrue(plantUmlSource.contains("authenticate"));
 		assertTrue(plantUmlSource.contains("/Test"));

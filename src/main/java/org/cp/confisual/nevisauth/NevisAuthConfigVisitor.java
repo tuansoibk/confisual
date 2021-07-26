@@ -5,6 +5,6 @@
 package org.cp.confisual.nevisauth;
 
 public interface NevisAuthConfigVisitor {
-	void visit(AuthState authState);
+	boolean visit(AuthState authState);
 	void visit(Domain domain);
 }

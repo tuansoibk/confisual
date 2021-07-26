@@ -3,6 +3,7 @@ package org.cp.confisual.nevisauth;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.cp.confisual.VisitableConfigObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Getter
 @EqualsAndHashCode
-public class Domain implements VisitableConfigObject {
+public class Domain implements VisitableConfigObject<NevisAuthConfigVisitor> {
 
   private final String name;
   private final Map<String, AuthState> authStates = new HashMap<>();

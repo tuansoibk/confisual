@@ -4,6 +4,8 @@
 
 package org.cp.confisual.nevisauth;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class PlantUmlVisitor implements NevisAuthConfigVisitor {
@@ -20,29 +22,39 @@ public class PlantUmlVisitor implements NevisAuthConfigVisitor {
 
 	public static final String POINT = "[*]";
 
-	private StringBuilder plantumlSource = new StringBuilder();
+	private List<String> existingAuthStates = new ArrayList<>();
 
-	public String getPlantumlSource() {
-		return STARTUML + MAX_WEIGHT_HEIGHT + this.plantumlSource.toString() + ENDUML;
+	private StringBuilder sourceBuilder = new StringBuilder();
+
+	public String getSourceBuilder() {
+		return STARTUML + MAX_WEIGHT_HEIGHT + this.sourceBuilder.toString() + ENDUML;
 	}
 
 	@Override
-	public void visit(AuthState authState) {
+	public boolean visit(AuthState authState) {
 		if (authState == null) {
-			return;
+			return false;
 		}
+
+		if (existingAuthStates.contains(authState.getName())) {
+				return false;
+		}
+
+		existingAuthStates.add(authState.getName());
 
 		if (authState.getTransitions().isEmpty()) {
 			//final auth state
-			this.plantumlSource.append(authState.getName() + NEXT_ARROW + POINT);
-		} else {
-			this.plantumlSource.append(authState.getTransitions()
+			this.sourceBuilder.append(authState.getName() + NEXT_ARROW + POINT + ENDL);
+			return false;
+		}
+
+		this.sourceBuilder.append(authState.getTransitions()
 					.stream()
 					.map(transition -> authState.getName() + NEXT_ARROW + transition.getAuthStateName() + ": " + transition.getName())
 					.collect(Collectors.joining(ENDL)));
-		}
+		this.sourceBuilder.append(ENDL);
 
-		this.plantumlSource.append(ENDL);
+		return true;
 	}
 
 	@Override
@@ -52,8 +64,8 @@ public class PlantUmlVisitor implements NevisAuthConfigVisitor {
 		}
 
 		domain.getEntries().forEach(entry -> {
-			this.plantumlSource.append(domain.getName() + NEXT_ARROW + entry.getMethod() + ENDL);
-			this.plantumlSource.append(entry.getMethod() + NEXT_ARROW + entry.getAuthStateName() + ": " + entry.getSelector() + ENDL);
+			this.sourceBuilder.append(domain.getName() + NEXT_ARROW + entry.getMethod() + ENDL);
+			this.sourceBuilder.append(entry.getMethod() + NEXT_ARROW + entry.getAuthStateName() + ": " + entry.getSelector() + ENDL);
 		});
 	}
 }
