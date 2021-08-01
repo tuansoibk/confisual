@@ -22,13 +22,11 @@ public class AuthState implements VisitableConfigObject<NevisAuthConfigVisitor> 
 	}
 
 	@Override
-	public void accept(NevisAuthConfigVisitor nevisAuthConfigVisitor) {
-		boolean canGoDeeper = nevisAuthConfigVisitor.visit(this);
+	public void accept(NevisAuthConfigVisitor visitor) {
+		boolean canGoDeeper = visitor.visit(this);
 
-		if (canGoDeeper == false) {
-				return;
+		if (canGoDeeper) {
+				this.getTransitions().forEach(transition -> transition.getAuthState().accept(visitor));
 		}
-
-		this.getTransitions().forEach(transition -> transition.getAuthState().accept(nevisAuthConfigVisitor));
 	}
 }

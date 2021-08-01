@@ -28,8 +28,8 @@ public class Domain implements VisitableConfigObject<NevisAuthConfigVisitor> {
   }
 
   @Override
-  public void accept(NevisAuthConfigVisitor nevisAuthConfigVisitor) {
-    nevisAuthConfigVisitor.visit(this);
-    this.getEntries().forEach(entry -> entry.getAuthState().accept(nevisAuthConfigVisitor));
+  public void accept(NevisAuthConfigVisitor visitor) {
+    visitor.visit(this);
+    this.getEntries().forEach(entry -> entry.getAuthState().accept(visitor));
   }
 }
