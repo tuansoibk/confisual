@@ -2,7 +2,7 @@
  * Author : AdNovum Informatik AG
  */
 
-package org.cp.confisual.nevisauth;
+package org.cp.confisual;
 
 public class VisualisationException extends Exception {
 

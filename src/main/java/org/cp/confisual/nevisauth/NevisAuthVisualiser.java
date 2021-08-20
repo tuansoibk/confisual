@@ -9,6 +9,7 @@ import java.util.List;
 import net.sourceforge.plantuml.SourceStringReader;
 import net.sourceforge.plantuml.security.SFile;
 import org.cp.confisual.ParserException;
+import org.cp.confisual.VisualisationException;
 
 public class NevisAuthVisualiser {
   public static String IMG_EXTENSION = ".PNG";

@@ -12,7 +12,7 @@ import org.cp.confisual.TestUtils;
 import org.cp.confisual.nevisauth.Domain;
 import org.cp.confisual.nevisauth.Parser;
 import org.cp.confisual.nevisauth.NevisAuthVisualiser;
-import org.cp.confisual.nevisauth.VisualisationException;
+import org.cp.confisual.VisualisationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
