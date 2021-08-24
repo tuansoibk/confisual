@@ -12,9 +12,7 @@ import org.cp.confisual.ParserException;
 import org.cp.confisual.VisualisationException;
 
 public class NevisAuthVisualiser {
-  public static String IMG_EXTENSION = ".PNG";
-
-  private SourceStringReader reader;
+  public static final String IMG_EXTENSION = ".PNG";
 
   private Path destinationFolder;
 
@@ -42,7 +40,7 @@ public class NevisAuthVisualiser {
     for (Domain domain : domains) {
       PlantUmlVisitor visitor = new PlantUmlVisitor();
       domain.accept(visitor);
-      reader = new SourceStringReader(visitor.getSourceBuilder());
+      SourceStringReader reader = new SourceStringReader(visitor.getSourceBuilder());
       File img = new File(destinationFolder.resolve(domain.getName() + IMG_EXTENSION).toUri());
 
       try {

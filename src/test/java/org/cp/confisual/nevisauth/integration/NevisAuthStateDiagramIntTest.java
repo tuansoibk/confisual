@@ -40,7 +40,7 @@ class NevisAuthStateDiagramIntTest {
   }
 
   @Test
-  void canGenerateNevisAuthStateDiagram() throws VisualisationException {
+  void shouldGenerateNevisAuthStateDiagram() throws VisualisationException {
     // given
     NevisAuthVisualiser visualiser = new NevisAuthVisualiser(destinationFolder);
 
