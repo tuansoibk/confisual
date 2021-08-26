@@ -1,44 +1,18 @@
 plugins {
-    id 'java'
-    id 'org.sonarqube' version '3.3'
-}
+	id 'org.sonarqube' version '3.3'
 
-group 'org.cp'
-version '1.0-SNAPSHOT'
-
-repositories {
-    mavenCentral()
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
 }
 
 sonarqube {
-  properties {
-    property "sonar.projectKey", "tuansoibk_confisual"
-    property "sonar.organization", "tuansoibk"
-    property "sonar.host.url", "https://sonarcloud.io"
-  }
+	properties {
+		property "sonar.projectKey", "tuansoibk_confisual"
+		property "sonar.organization", "tuansoibk"
+		property "sonar.host.url", "https://sonarcloud.io"
+	}
 }
 
-dependencies {
-    implementation group: 'org.jdom', name: 'jdom2', version: '2.0.6'
-    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
-    implementation group: 'jaxen', name: 'jaxen', version: '1.2.0'
-    compile fileTree(dir: 'libs', include: '*.jar')
-
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.7.1'
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.1'
-
-    compileOnly 'org.projectlombok:lombok:1.18.20'
-    annotationProcessor 'org.projectlombok:lombok:1.18.20'
-
-    testCompileOnly 'org.projectlombok:lombok:1.18.20'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
-}
-
-test {
-    useJUnitPlatform()
+allprojects {
+	repositories {
+		mavenCentral()
+	}
 }
