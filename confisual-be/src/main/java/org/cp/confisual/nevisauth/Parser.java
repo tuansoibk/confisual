@@ -10,21 +10,44 @@ import org.jdom2.xpath.XPathFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.xml.XMLConstants;
 
 public class Parser {
 
-  public List<Domain> parse(File configFile) throws ParserException {
+  public static List<Domain> parse(File configFile) throws ParserException {
     Document doc;
     try {
       SAXBuilder sax = new SAXBuilder(); // NOSONAR: external DTD loading is disabled
+      sax.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+      sax.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
       sax.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
       doc = sax.build(configFile);
     } catch (IOException | JDOMException e) {
       throw new ParserException("Unable to parse nevisAuth config file", e);
     }
 
+    return parse(doc);
+  }
+
+  public static List<Domain> parse(String configXML) throws ParserException {
+    Document doc;
+    try {
+      SAXBuilder sax = new SAXBuilder();
+      sax.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+      sax.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+      sax.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+      doc = sax.build(new StringReader(configXML));
+    } catch (IOException | JDOMException e) {
+      throw new ParserException("Unable to parse nevisAuth config file", e);
+    }
+
+    return parse(doc);
+  }
+
+  private static List<Domain> parse(Document doc) {
     List<Domain> domains = getElementsFromDoc(doc, ".//Domain")
         .stream()
         .map(Parser::parseDomain)

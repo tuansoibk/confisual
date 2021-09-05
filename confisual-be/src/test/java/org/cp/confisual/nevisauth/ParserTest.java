@@ -2,9 +2,9 @@ package org.cp.confisual.nevisauth;
 
 import org.cp.confisual.ParserException;
 import org.cp.confisual.TestUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,19 +12,25 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class ParserTest {
 
-  private Parser underTest;
+  @Test
+  void shouldParseEsAuthConfigToDomainArrayWithConfigFile() throws ParserException {
+    // when
+    List<Domain> actual = Parser.parse(TestUtils.getTestResourceFile("esauth4.xml"));
 
-  @BeforeEach
-  void setUp() {
-    underTest = new Parser();
+    // then
+    assertDomains(actual);
   }
 
   @Test
-  void canParseEsAuthConfigToDomainArray() throws ParserException {
+  void shouldParseEsAuthConfigToDomainArrayWithConfigString() throws ParserException, IOException {
     // when
-    List<Domain> actual = underTest.parse(TestUtils.getTestResourceFile("esauth4.xml"));
+    List<Domain> actual = Parser.parse(TestUtils.getTestResourceContent("esauth4.xml"));
 
     // then
+    assertDomains(actual);
+  }
+
+  private void assertDomains(List<Domain> actual) {
     Domain domain = actual.get(0);
     assertEquals("TWOFASSO", domain.getName());
     assertEquals(5, domain.getEntries().size());

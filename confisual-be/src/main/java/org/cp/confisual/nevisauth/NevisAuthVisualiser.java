@@ -1,54 +1,70 @@
 package org.cp.confisual.nevisauth;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
+import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
-import net.sourceforge.plantuml.security.SFile;
 import org.cp.confisual.ParserException;
 import org.cp.confisual.VisualisationException;
 
 public class NevisAuthVisualiser {
-  public static final String IMG_EXTENSION = ".PNG";
 
-  private Path destinationFolder;
-
-  public NevisAuthVisualiser(Path destinationFolder) throws VisualisationException {
-    if (!Files.exists(destinationFolder) || !Files.isDirectory(destinationFolder)) {
-      throw new VisualisationException("Destination is invalid");
-    }
-
-    this.destinationFolder = destinationFolder;
-  }
-
-  public void visualiseDomains(File nevisAuthFile) throws VisualisationException {
+  public List<String> visualiseDomains(File nevisAuthFile) throws VisualisationException {
     List<Domain> domains;
     try {
-      domains = new Parser().parse(nevisAuthFile);
+      domains = Parser.parse(nevisAuthFile);
     }
     catch (ParserException e) {
       throw new VisualisationException("Can't parse nevisAuth file", e);
     }
 
+    return visualize(domains);
+  }
+
+  public List<String> visualiseDomains(String nevisAuthFile) throws VisualisationException {
+    List<Domain> domains;
+    try {
+      domains = Parser.parse(nevisAuthFile);
+    }
+    catch (ParserException e) {
+      throw new VisualisationException("Can't parse nevisAuth string", e);
+    }
+
+    return visualize(domains);
+  }
+
+
+  private List<String> visualize(List<Domain> domains) throws VisualisationException {
     if (domains.isEmpty()) {
       throw new VisualisationException("nevisAuth file doesn't have any domains");
     }
+
+    List<String> encodedImages = new ArrayList<>();
 
     for (Domain domain : domains) {
       PlantUmlVisitor visitor = new PlantUmlVisitor();
       domain.accept(visitor);
       SourceStringReader reader = new SourceStringReader(visitor.getSourceBuilder());
-      File img = new File(destinationFolder.resolve(domain.getName() + IMG_EXTENSION).toUri());
 
       try {
-        reader.outputImage(SFile.fromFile(img));
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        reader.generateImage(os, new FileFormatOption(FileFormat.PNG));
+        os.close();
+
+        encodedImages.add(Base64.getEncoder().encodeToString(os.toByteArray()));
       }
       catch (IOException e) {
         throw new VisualisationException("Can't visualize img for domain " + domain.getName(), e);
       }
     }
+
+    return encodedImages;
   }
+
 }

@@ -2,9 +2,6 @@ package org.cp.confisual.nevisauth.integration;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.cp.confisual.ParserException;
@@ -16,38 +13,38 @@ import org.cp.confisual.VisualisationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.cp.confisual.nevisauth.NevisAuthVisualiser.IMG_EXTENSION;
 import static org.junit.jupiter.api.Assertions.*;
 
 class NevisAuthStateDiagramIntTest {
 
-  // support objects
-  private final Path destinationFolder = Paths.get(System.getProperty("user.dir") + "/build/libs");
-  private final File nevisAuthFile = TestUtils.getTestResourceFile("esauth4.xml");
-  private List<Domain> domains;
+  NevisAuthVisualiser underTest;
 
   @BeforeEach
-  void setUp() throws ParserException {
-    domains = new Parser().parse(nevisAuthFile);
-    domains.forEach(domain -> {
-      try {
-        Files.deleteIfExists(destinationFolder.resolve(domain.getName() + IMG_EXTENSION));
-      }
-      catch (IOException e) {
-        e.printStackTrace();
-      }
-    });
+  public void setUp() {
+    underTest = new NevisAuthVisualiser();
   }
 
   @Test
-  void shouldGenerateNevisAuthStateDiagram() throws VisualisationException {
+  void shouldGenerateNevisAuthStateDiagramWithConfigFile() throws VisualisationException {
     // given
-    NevisAuthVisualiser visualiser = new NevisAuthVisualiser(destinationFolder);
+    File nevisAuthFile = TestUtils.getTestResourceFile("esauth4.xml");
 
     // when
-    visualiser.visualiseDomains(nevisAuthFile);
+    List<String> encodedImages = underTest.visualiseDomains(nevisAuthFile);
 
     // then
-    domains.forEach(domain -> assertTrue(Files.exists(destinationFolder.resolve(domain.getName() + IMG_EXTENSION))));
+    assertTrue(encodedImages.size() > 0);
+  }
+
+  @Test
+  void shouldGenerateNevisAuthStateDiagramWithConfigString() throws VisualisationException, IOException {
+    // given
+    String nevisAuthString = TestUtils.getTestResourceContent("esauth4.xml");
+
+    // when
+    List<String> encodedImages = underTest.visualiseDomains(nevisAuthString);
+
+    // then
+    assertTrue(encodedImages.size() > 0);
   }
 }
