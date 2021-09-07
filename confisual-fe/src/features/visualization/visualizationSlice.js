@@ -4,7 +4,7 @@ import configData from "../../config.json"
 
 const initialState = {
 	diagrams: [],
-	errors: []
+	error: undefined,
 };
 
 export const postConfig = createAsyncThunk(
@@ -33,8 +33,8 @@ const visualizationSlice = createSlice({
       	state.diagrams.push(...action.payload);
       })
       .addCase(postConfig.rejected, (state, action) => {
-      	state.errors = [];
-      	state.errors.push(...action.payload);
+		  state.diagrams = [];
+		  state.error = action.error.message
       });
 	}
 });

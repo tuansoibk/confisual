@@ -2,7 +2,9 @@ package org.cp.confisual;/*
  * Author : AdNovum Informatik AG
  */
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.cp.confisual.nevisauth.NevisAuthConfigRequest;
 import org.cp.confisual.nevisauth.NevisAuthVisualiser;
@@ -31,9 +33,12 @@ public class VisualizationController {
 						responseData = visualiser.visualiseDomains(data.getNevisAuthConfig());
 				}
 				catch (VisualisationException e) {
-						return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+						Map<String, String> errorResponse = new HashMap<>();
+						errorResponse.put("message", e.getLocalizedMessage());
+						errorResponse.put("status", HttpStatus.BAD_REQUEST.toString());
+						return new ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST);
 				}
 
-				return new ResponseEntity<>(responseData, HttpStatus.OK);
+				return new ResponseEntity(responseData, HttpStatus.OK);
 		}
 }
