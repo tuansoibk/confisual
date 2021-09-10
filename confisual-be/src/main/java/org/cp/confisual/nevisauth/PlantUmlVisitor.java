@@ -27,7 +27,7 @@ public class PlantUmlVisitor implements NevisAuthConfigVisitor {
 	private StringBuilder sourceBuilder = new StringBuilder();
 
 	public String getSourceBuilder() {
-		return STARTUML + MAX_WEIGHT_HEIGHT + this.sourceBuilder.toString() + ENDUML;
+		return STARTUML + this.sourceBuilder.toString() + ENDUML;
 	}
 
 	@Override
