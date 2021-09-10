@@ -1,8 +1,9 @@
 import { Grid } from "@material-ui/core";
 import './Visualiser.css'
-import { useState } from "react";
+import React, { useState } from "react";
 import { VisualisationAPI } from "../api/VisualisationAPI";
 import Fab from '@material-ui/core/Fab';
+import DiagramTabs from './DiagramTabs';
 
 export default function Visualiser() {
   const [diagrams, setDiagrams] = useState([]);
@@ -13,8 +14,8 @@ export default function Visualiser() {
     clear();
     VisualisationAPI.visualise(input)
       .then(json => {
-        if (json.diagrams && json.diagrams.length > 0) {
-          setDiagrams(json.diagrams);
+        if (json.diagrams) {
+          setDiagrams(Object.entries(json.diagrams));
         }
         else if (json.errors && json.errors.length > 0) {
           setError(json.errors.join('\n'));
@@ -35,7 +36,8 @@ export default function Visualiser() {
   
   return (
     <Grid container direction="column" spacing={2}>
-      <Grid item>
+      <Grid container item direction="column" alignContent="center">
+        <label>XML Configuration:</label>
         <textarea
           id="input"
           onChange={(e) => setInput(e.target.value)}
@@ -62,16 +64,13 @@ export default function Visualiser() {
         </Fab>
       </Grid>
       
-      <Grid item>
+      <Grid
+        container item
+        direction="column"
+        alignContent="center">
         {error !== undefined && <div>Error: {error}</div>}
         {diagrams.length > 0 &&
-        <div data-testid="diagrams">
-          {
-            diagrams.map((diagram) => (
-              <img alt="visualisation diagram" src={"data:image/png;base64," + diagram}/>
-            ))
-          }
-        </div>
+          <DiagramTabs diagrams={diagrams}/>
         }
       </Grid>
     </Grid>
