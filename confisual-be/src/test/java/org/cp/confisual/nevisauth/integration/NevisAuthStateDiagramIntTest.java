@@ -3,6 +3,7 @@ package org.cp.confisual.nevisauth.integration;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.cp.confisual.ParserException;
 import org.cp.confisual.TestUtils;
@@ -30,7 +31,7 @@ class NevisAuthStateDiagramIntTest {
     File nevisAuthFile = TestUtils.getTestResourceFile("esauth4.xml");
 
     // when
-    List<String> encodedImages = underTest.visualiseDomains(nevisAuthFile);
+    Map<String, String> encodedImages = underTest.visualiseDomains(nevisAuthFile);
 
     // then
     assertTrue(encodedImages.size() > 0);
@@ -42,7 +43,7 @@ class NevisAuthStateDiagramIntTest {
     String nevisAuthString = TestUtils.getTestResourceContent("esauth4.xml");
 
     // when
-    List<String> encodedImages = underTest.visualiseDomains(nevisAuthString);
+    Map<String, String> encodedImages = underTest.visualiseDomains(nevisAuthString);
 
     // then
     assertTrue(encodedImages.size() > 0);

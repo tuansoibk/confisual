@@ -2,7 +2,9 @@ package org.cp.confisual;/*
  * Author : AdNovum Informatik AG
  */
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.cp.confisual.nevisauth.NevisAuthConfigRequest;
 import org.cp.confisual.nevisauth.NevisAuthVisualiser;
@@ -16,24 +18,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin
-public class VisualizationController {
+public class VisualisationController {
 		@GetMapping("/")
 		public String index() {
 				return "Greetings from Spring Boot!";
 		}
 
 		@PostMapping(path = "/visualise/nevisAuth")
-		public ResponseEntity<List<String>> visualizeNevisAuth(@RequestBody NevisAuthConfigRequest data) {
+		public ResponseEntity<VisualisationResponse> visualizeNevisAuth(@RequestBody NevisAuthConfigRequest data) {
 				NevisAuthVisualiser visualiser= new NevisAuthVisualiser();
-
-				List<String> responseData = null;
+				VisualisationResponse response;
 				try {
-						responseData = visualiser.visualiseDomains(data.getNevisAuthConfig());
+						Map<String, String> diagrams = visualiser.visualiseDomains(data.getNevisAuthConfig());
+						response = VisualisationResponse.success(diagrams);
 				}
 				catch (VisualisationException e) {
-						return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+						response = VisualisationResponse.error(Collections.singletonList(e.getMessage()));
 				}
 
-				return new ResponseEntity<>(responseData, HttpStatus.OK);
+				return new ResponseEntity<>(response, HttpStatus.OK);
 		}
 }
