@@ -1,7 +1,6 @@
 export function VisualisationAPI() {}
 
 function visualise(input) {
-  console.log(process.env.REACT_APP_BACKEND_URL);
   return fetch(process.env.REACT_APP_BACKEND_URL + '/visualise/nevisAuth', {
     method: 'POST',
     headers: {

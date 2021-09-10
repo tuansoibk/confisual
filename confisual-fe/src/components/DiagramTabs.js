@@ -4,6 +4,8 @@ import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import { Grid } from "@material-ui/core";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -47,24 +49,28 @@ export default function DiagramTabs(props) {
   };
 
   return (
-    <Box sx={{ width: '98%' }}>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs
-          value={value}
-          aria-label="basic tabs example"
-          centered
-          onChange={handleChange}
-        >
+    <Box sx={{ width: '80%' }}>
+      <Grid container direction="column" alignContent="center">
+        <Grid item xs={8}>
+          <Tabs
+              classes={{root: { justifyContent: "center" }, scroller: { flexGrow: "0" }}}
+              value={value}
+              onChange={handleChange}
+              aria-label="domain diagram tabs"
+              variant={"scrollable"}
+          >
           {
-            diagrams.map(([domain, diagram], idx) => (
-              <Tab
-                label={`Domain ${domain}`}
-                {...a11yProps(idx)}
-              />
-            ))
+              diagrams.map(([domain, diagram], idx) => (
+                  <Tab
+                      key={idx}
+                      label={`Domain ${domain}`}
+                      {...a11yProps(idx)}
+                  />
+              ))
           }
-        </Tabs>
-      </Box>
+          </Tabs>
+        </Grid>
+      </Grid>
       {
         diagrams.map(([_, diagram], idx) => (
           <TabPanel
@@ -72,10 +78,16 @@ export default function DiagramTabs(props) {
             index={idx}
           >
             <Box sx={{ border: '1px solid grey' }}>
-              <img
-                alt="visualisation diagram"
-                src={"data:image/png;base64," + diagram}
-              />
+              <TransformWrapper
+                centerOnInit
+                minScale={0.2}>
+                <TransformComponent wrapperStyle={{margin: "auto", maxWidth: "100%"}}>
+                    <img
+                      alt="domain diagram"
+                      src={"data:image/png;base64," + diagram}
+                    />
+                </TransformComponent>
+              </TransformWrapper>
             </Box>
           </TabPanel>
         ))
