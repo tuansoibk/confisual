@@ -14,8 +14,6 @@ public class PlantUmlVisitor implements NevisAuthConfigVisitor {
 
 	public static final String ENDUML = "@enduml\n";
 
-	public static final String MAX_WEIGHT_HEIGHT = "scale max 2000*6000\n";
-
 	public static final String NEXT_ARROW = "-->";
 
 	public static final String ENDL = System.lineSeparator();

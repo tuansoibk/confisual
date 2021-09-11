@@ -2,13 +2,9 @@ package org.cp.confisual.nevisauth.integration;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
-import org.cp.confisual.ParserException;
 import org.cp.confisual.TestUtils;
-import org.cp.confisual.nevisauth.Domain;
-import org.cp.confisual.nevisauth.Parser;
 import org.cp.confisual.nevisauth.NevisAuthVisualiser;
 import org.cp.confisual.VisualisationException;
 import org.junit.jupiter.api.BeforeEach;
