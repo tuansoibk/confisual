@@ -4,18 +4,27 @@ import React, { useState } from "react";
 import { VisualisationAPI } from "../api/VisualisationAPI";
 import Fab from '@material-ui/core/Fab';
 import DiagramTabs from './DiagramTabs';
+import PropTypes from 'prop-types';
 
-export default function Visualiser() {
-  const [diagrams, setDiagrams] = useState([]);
+export default function Visualiser(props) {
+  const { domain } = props;
+  const [diagrams, setDiagrams] = useState(() => {
+    const diagramsValue = localStorage.getItem(`${domain}.diagrams`);
+    
+    return diagramsValue !== null
+      ? Object.entries(JSON.parse(diagramsValue))
+      : [];
+  });
   const [error, setError] = useState(undefined);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(localStorage.getItem(`${domain}.input`) ?? '');
   
   function visualise() {
     clear();
-    VisualisationAPI.visualise(input)
+    VisualisationAPI.visualise(domain, input)
       .then(json => {
         if (json.diagrams) {
           setDiagrams(Object.entries(json.diagrams));
+          localStorage.setItem(`${domain}.diagrams`, JSON.stringify(json.diagrams));
         }
         else if (json.errors && json.errors.length > 0) {
           setError(json.errors.join('\n'));
@@ -32,6 +41,12 @@ export default function Visualiser() {
   function clear() {
     setDiagrams([]);
     setError(undefined);
+    localStorage.removeItem(`${domain}.diagrams`);
+  }
+  
+  function updateInput(value) {
+    setInput(value);
+    localStorage.setItem(`${domain}.input`, value);
   }
   
   return (
@@ -40,7 +55,8 @@ export default function Visualiser() {
         <label>XML Configuration:</label>
         <textarea
           id="input"
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => updateInput(e.target.value)}
+          value={input}
         >
         </textarea>
       </Grid>
@@ -76,3 +92,7 @@ export default function Visualiser() {
     </Grid>
   );
 }
+
+Visualiser.propTypes = {
+  domain: PropTypes.string.isRequired,
+};

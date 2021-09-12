@@ -47,6 +47,7 @@ public class Parser {
     List<FilterMapping> filterMappings = getElementsFromDoc(doc, ".//filter-mapping")
         .stream()
         .map(Parser::parseFilterMapping)
+        .filter(filterMapping -> filterMapping.getUrlPattern() != null)
         .collect(Collectors.toList());
 
     List<ServletMapping> servletMappings = getElementsFromDoc(doc, ".//servlet-mapping")
