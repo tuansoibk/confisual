@@ -1,13 +1,13 @@
 export function VisualisationAPI() {}
 
-function visualise(input) {
-  return fetch(process.env.REACT_APP_BACKEND_URL + '/visualise/nevisAuth', {
+function visualise(domain, input) {
+  return fetch(process.env.REACT_APP_BACKEND_URL + `/visualise/${domain}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      nevisAuthConfig: input
+      xmlConfig: input
     }),
   })
   .then(response => {
@@ -19,6 +19,6 @@ function visualise(input) {
   });
 }
 
-VisualisationAPI.visualise = function (input) {
-  return visualise(input);
+VisualisationAPI.visualise = function (domain, input) {
+  return visualise(domain, input);
 }
