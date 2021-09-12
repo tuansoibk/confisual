@@ -1,34 +1,31 @@
 package org.cp.confisual.nevisauth;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
-import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.FileFormatOption;
-import net.sourceforge.plantuml.SourceStringReader;
 import org.cp.confisual.ParserException;
 import org.cp.confisual.VisualisationException;
+import org.cp.confisual.util.PlantUmlUtils;
 
 public class NevisAuthVisualiser {
 
-  public Map<String, String> visualiseDomains(File nevisAuthFile) throws VisualisationException {
+  public Map<String, String> visualiseDomains(File esauthXmlFile) throws VisualisationException {
     List<Domain> domains;
     try {
-      domains = Parser.parse(nevisAuthFile);
+      domains = Parser.parse(esauthXmlFile);
     }
     catch (ParserException e) {
-      throw new VisualisationException("Can't parse nevisAuth file", e);
+      throw new VisualisationException("Can't parse nevisAuth config file", e);
     }
 
     return visualize(domains);
   }
 
-  public Map<String, String> visualiseDomains(String nevisAuthFile) throws VisualisationException {
+  public Map<String, String> visualiseDomains(String esauthXmlContent) throws VisualisationException {
     List<Domain> domains;
     try {
-      domains = Parser.parse(nevisAuthFile);
+      domains = Parser.parse(esauthXmlContent);
     }
     catch (ParserException e) {
       throw new VisualisationException("Can't parse nevisAuth string", e);
@@ -43,26 +40,15 @@ public class NevisAuthVisualiser {
       throw new VisualisationException("nevisAuth file doesn't have any domains");
     }
 
-    Map<String, String> encodedImages = new HashMap<>();
+    Map<String, String> umlSources = domains
+        .stream()
+        .map(domain -> {
+          PlantUmlSourceBuilder visitor = new PlantUmlSourceBuilder();
+          domain.accept(visitor);
+          return Map.entry(domain.getName(), visitor.getSource());
+        })
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-    for (Domain domain : domains) {
-      PlantUmlVisitor visitor = new PlantUmlVisitor();
-      domain.accept(visitor);
-      SourceStringReader reader = new SourceStringReader(visitor.getSourceBuilder());
-
-      try {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        reader.generateImage(os, new FileFormatOption(FileFormat.PNG));
-        os.close();
-
-        encodedImages.put(domain.getName(), Base64.getEncoder().encodeToString(os.toByteArray()));
-      }
-      catch (IOException e) {
-        throw new VisualisationException("Can't visualize img for domain " + domain.getName(), e);
-      }
-    }
-
-    return encodedImages;
+    return PlantUmlUtils.generateImages(umlSources);
   }
-
 }

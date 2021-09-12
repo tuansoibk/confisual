@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class PlantUmlVisitor implements NevisAuthConfigVisitor {
+public class PlantUmlSourceBuilder implements NevisAuthConfigVisitor {
 
 	public static final String STARTUML = "@startuml\n";
 
@@ -24,7 +24,7 @@ public class PlantUmlVisitor implements NevisAuthConfigVisitor {
 
 	private StringBuilder sourceBuilder = new StringBuilder();
 
-	public String getSourceBuilder() {
+	public String getSource() {
 		return STARTUML + this.sourceBuilder.toString() + ENDUML;
 	}
 

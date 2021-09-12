@@ -1,4 +1,4 @@
-package org.cp.confisual.nevisauth.integration;
+package org.cp.confisual.nevisauth;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class NevisAuthStateDiagramIntTest {
+class NevisAuthVisualiserTest {
 
   NevisAuthVisualiser underTest;
 

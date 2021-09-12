@@ -1,19 +1,19 @@
 package org.cp.confisual.plantuml;
 
-import static org.cp.confisual.nevisauth.PlantUmlVisitor.NEXT_ARROW;
+import static org.cp.confisual.nevisauth.PlantUmlSourceBuilder.NEXT_ARROW;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.cp.confisual.nevisauth.AuthState;
 import org.cp.confisual.nevisauth.Domain;
 import org.cp.confisual.nevisauth.Entry;
-import org.cp.confisual.nevisauth.PlantUmlVisitor;
+import org.cp.confisual.nevisauth.PlantUmlSourceBuilder;
 import org.cp.confisual.nevisauth.Transition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class PlantUmlVisitorTest {
+class PlantUmlSourceBuilderTest {
 
-	PlantUmlVisitor underTest;
+	PlantUmlSourceBuilder underTest;
 
 	// supporting objects
 	private AuthState authState;
@@ -21,8 +21,8 @@ class PlantUmlVisitorTest {
 	private Domain domain;
 
 	@BeforeEach
-	public void setUp() {
-		underTest = new PlantUmlVisitor();
+	void setUp() {
+		underTest = new PlantUmlSourceBuilder();
 		setUpTestData();
 	}
 
@@ -41,24 +41,24 @@ class PlantUmlVisitorTest {
 	}
 
 	@Test
-	public void canVisitAuthState() {
+	void canVisitAuthState() {
 		// when
 		this.authState.accept(underTest);
 
 		// then
-		String plantUmlSource = underTest.getSourceBuilder();
+		String plantUmlSource = underTest.getSource();
 		assertTrue(plantUmlSource.contains("TestState"));
 		assertTrue(plantUmlSource.contains("ok"));
 		assertTrue(plantUmlSource.contains("Done"));
 	}
 
 	@Test
-	public void canVisitDomain() {
+	void canVisitDomain() {
 		// when
 		this.domain.accept(underTest);
 
 		// then
-		String plantUmlSource = underTest.getSourceBuilder();
+		String plantUmlSource = underTest.getSource();
 		assertTrue(plantUmlSource.contains("TestDomain"));
 		assertTrue(plantUmlSource.contains("authenticate"));
 		assertTrue(plantUmlSource.contains("/test"));
@@ -68,7 +68,7 @@ class PlantUmlVisitorTest {
 	}
 
 	@Test
-	public void canVisitStateUsedInMultipleEntries() {
+	void canVisitStateUsedInMultipleEntries() {
 			// given
 			Entry secondEntry = new Entry("stepup", "TestState", "/stepup");
 			secondEntry.setAuthState(this.authState);
@@ -78,12 +78,12 @@ class PlantUmlVisitorTest {
 			this.domain.accept(underTest);
 
 			// then
-			String plantUmlSource = underTest.getSourceBuilder();
+			String plantUmlSource = underTest.getSource();
 			this.domain.getEntries().forEach(entry -> assertTrue(plantUmlSource.contains(entry.getMethod() + NEXT_ARROW + entry.getAuthStateName())));
 	}
 
 	@Test
-	public void canVisitLoopAuthState() {
+	void canVisitLoopAuthState() {
 			// given
 			Transition transition = new Transition("ok", "TestState");
 			transition.setAuthState(this.authState);
@@ -93,7 +93,7 @@ class PlantUmlVisitorTest {
 			this.domain.accept(underTest);
 
 			// then
-			String plantUmlSource = underTest.getSourceBuilder();
+			String plantUmlSource = underTest.getSource();
 			assertTrue(plantUmlSource.contains(this.authState.getName() + NEXT_ARROW + this.authState.getName()));
 	}
 }
