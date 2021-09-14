@@ -8,23 +8,18 @@ import java.util.Map;
 import org.cp.confisual.nevisauth.NevisConfig;
 import org.cp.confisual.nevisauth.NevisAuthVisualiser;
 import org.cp.confisual.nevisproxy.NevisProxyVisualiser;
+import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@CrossOrigin
+@BasePathAwareController
 public class VisualisationController {
-		@GetMapping("/")
-		public String index() {
-				return "Greetings from Spring Boot!";
-		}
 
-		@PostMapping(path = "/visualise/nevisAuth")
+		@PostMapping(path = "/v1/visualise/nevisAuth")
 		public ResponseEntity<VisualisationResponse> visualiseNevisAuth(@RequestBody NevisConfig data) {
 				NevisAuthVisualiser visualiser= new NevisAuthVisualiser();
 				VisualisationResponse response;
@@ -39,7 +34,7 @@ public class VisualisationController {
 				return new ResponseEntity<>(response, HttpStatus.OK);
 		}
 
-	@PostMapping(path = "/visualise/nevisProxy")
+	@PostMapping(path = "/v1/visualise/nevisProxy")
 	public ResponseEntity<VisualisationResponse> visualiseNevisProxy(@RequestBody NevisConfig data) {
 		NevisProxyVisualiser visualiser = new NevisProxyVisualiser();
 		VisualisationResponse response;

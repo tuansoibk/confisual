@@ -32,7 +32,7 @@ class VisualisationControllerTest {
     NevisConfig config = new NevisConfig(TestUtils.getTestResourceContent("esauth4.xml"));
 
     // when
-    MvcResult mvcResult = mockMvc.perform(post("http://localhost:" + port + "/visualise/nevisAuth")
+    MvcResult mvcResult = mockMvc.perform(post("http://localhost:" + port + "/v1/visualise/nevisAuth")
             .contentType("application/json")
             .content(mapper.writeValueAsString(config)))
             .andReturn();
@@ -53,7 +53,7 @@ class VisualisationControllerTest {
     NevisConfig config = new NevisConfig(TestUtils.getTestResourceContent("web.xml"));
 
     // when
-    MvcResult mvcResult = mockMvc.perform(post("http://localhost:" + port + "/visualise/nevisProxy")
+    MvcResult mvcResult = mockMvc.perform(post("http://localhost:" + port + "/v1/visualise/nevisProxy")
             .contentType("application/json")
             .content(mapper.writeValueAsString(config)))
             .andReturn();

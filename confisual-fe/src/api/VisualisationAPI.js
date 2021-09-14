@@ -1,7 +1,7 @@
 export function VisualisationAPI() {}
 
 function visualise(domain, input) {
-  return fetch(process.env.REACT_APP_BACKEND_URL + `/visualise/${domain}`, {
+  return fetch(`/api/v1/visualise/${domain}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -1,3 +1,4 @@
 rootProject.name = 'confisual'
 
 include 'confisual-be'
+include 'confisual-fe'
