@@ -1,6 +1,7 @@
 package org.cp.confisual.nevisauth;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,7 +16,7 @@ public class NevisAuthVisualiser {
     try {
       domains = Parser.parse(esauthXmlFile);
     }
-    catch (ParserException e) {
+    catch (ParserException | IOException e) {
       throw new VisualisationException("Can't parse nevisAuth config file", e);
     }
 

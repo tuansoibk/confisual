@@ -6,6 +6,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,7 +16,7 @@ public class Parser {
 
   private Parser() {}
 
-  public static List<Domain> parse(File configFile) throws ParserException {
+  public static List<Domain> parse(File configFile) throws ParserException, IOException {
     return parse(XmlUtils.getDocument(configFile));
   }
 
