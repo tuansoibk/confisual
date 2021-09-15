@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class ParserTest {
 
   @Test
-  void shouldParseWebXmlConfigToUrlPatternList_givenConfigFile() throws ParserException {
+  void shouldParseWebXmlConfigToUrlPatternList_givenConfigFile() throws ParserException, IOException {
     // when
     List<UrlPattern> actual = Parser.parse(TestUtils.getTestResourceFile("web.xml"));
 

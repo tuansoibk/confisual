@@ -9,6 +9,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class Parser {
   private Parser() {
   }
 
-  public static List<UrlPattern> parse(File configFile) throws ParserException {
+  public static List<UrlPattern> parse(File configFile) throws ParserException, IOException {
     return parse(getDocument(configFile));
   }
 

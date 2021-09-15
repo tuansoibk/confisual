@@ -5,6 +5,7 @@ import org.cp.confisual.VisualisationException;
 import org.cp.confisual.util.PlantUmlUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,7 +17,7 @@ public class NevisProxyVisualiser {
     try {
       urlPatterns = Parser.parse(webXmlFile);
     }
-    catch (ParserException e) {
+    catch (ParserException | IOException e) {
       throw new VisualisationException("Can't parse nevisProxy config file", e);
     }
 

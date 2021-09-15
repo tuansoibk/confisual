@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class ParserTest {
 
   @Test
-  void shouldParseEsAuthConfigToDomainList_givenConfigFile() throws ParserException {
+  void shouldParseEsAuthConfigToDomainList_givenConfigFile() throws ParserException, IOException {
     // when
     List<Domain> actual = Parser.parse(TestUtils.getTestResourceFile("esauth4.xml"));
 
