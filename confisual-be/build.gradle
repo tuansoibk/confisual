@@ -18,11 +18,14 @@ repositories {
 }
 
 dependencies {
+    implementation project(':confisual-fe')
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation group: 'org.jdom', name: 'jdom2', version: '2.0.6'
     implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
     implementation group: 'jaxen', name: 'jaxen', version: '1.2.0'
-    compile fileTree(dir: 'libs', include: '*.jar')
+    implementation files('libs/plantuml.jar')
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.7.1'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.1'

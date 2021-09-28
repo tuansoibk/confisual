@@ -1,2 +1,7 @@
 server:
   port: 3003
+
+spring:
+  data:
+    rest:
+      base-path: /api
