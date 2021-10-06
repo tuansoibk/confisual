@@ -14,8 +14,9 @@ import lombok.Setter;
 public class Trail {
 
 	private final String uri;
+	private final String method;
+	private final Instant timestamp;
 	private Map<String, String> headers;
 	private int responseCode;
-	private Instant timestamp;
 	private List<String> filters;
 }

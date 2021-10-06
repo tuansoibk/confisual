@@ -18,8 +18,6 @@ repositories {
 }
 
 dependencies {
-    implementation project(':confisual-fe')
-
     implementation 'org.springframework.boot:spring-boot-starter-data-rest'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation group: 'org.jdom', name: 'jdom2', version: '2.0.6'
@@ -36,6 +34,10 @@ dependencies {
 
     testCompileOnly 'org.projectlombok:lombok:1.18.20'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+}
+
+bootJar {
+    dependsOn(':confisual-fe:jar')
 }
 
 test {
