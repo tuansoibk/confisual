@@ -1,27 +1,26 @@
 import { Grid } from "@material-ui/core";
 import './Visualiser.css'
 import React, { useState } from "react";
-import { VisualisationAPI } from "../api/VisualisationAPI";
+import { VisualisationAPI } from "../../api/VisualisationAPI";
 import Fab from '@material-ui/core/Fab';
-import DiagramTabs from './DiagramTabs';
+import DiagramTabs from '../DiagramTabs/DiagramTabs';
 import PropTypes from 'prop-types';
 
 export default function Visualiser(props) {
   const { domain } = props;
   const [diagrams, setDiagrams] = useState(() => {
     const diagramsValue = localStorage.getItem(`${domain}.diagrams`);
-    
+
     return diagramsValue !== null
       ? Object.entries(JSON.parse(diagramsValue))
       : [];
   });
   const [error, setError] = useState(undefined);
   const [input, setInput] = useState(localStorage.getItem(`${domain}.input`) ?? '');
-  
+
   function visualise() {
     clear();
-    VisualisationAPI.visualise(domain, input)
-      .then(json => {
+    VisualisationAPI.visualise(domain, input).then(json => {
         if (json.diagrams) {
           setDiagrams(Object.entries(json.diagrams));
           localStorage.setItem(`${domain}.diagrams`, JSON.stringify(json.diagrams));
@@ -37,18 +36,18 @@ export default function Visualiser(props) {
         setError(err.message);
       });
   }
-  
+
   function clear() {
     setDiagrams([]);
     setError(undefined);
     localStorage.removeItem(`${domain}.diagrams`);
   }
-  
+
   function updateInput(value) {
     setInput(value);
     localStorage.setItem(`${domain}.input`, value);
   }
-  
+
   return (
     <Grid container direction="column" spacing={2}>
       <Grid container item direction="column" alignContent="center">
@@ -60,13 +59,14 @@ export default function Visualiser(props) {
         >
         </textarea>
       </Grid>
-      
+
       <Grid item>
         <Fab
           color="primary"
           aria-label="visualise"
           variant="extended"
           onClick={() => visualise()}
+          data-testid="visualisationButton"
         >
           Visualise
         </Fab>
@@ -75,18 +75,19 @@ export default function Visualiser(props) {
           aria-label="clear"
           variant="extended"
           onClick={() => clear()}
+          data-testid="clearButton"
         >
           Clear
         </Fab>
       </Grid>
-      
+
       <Grid
         container item
         direction="column"
         alignContent="center">
-        {error !== undefined && <div>Error: {error}</div>}
+        {error !== undefined && <div data-testid="errorMessage">Error: {error}</div>}
         {diagrams.length > 0 &&
-          <DiagramTabs diagrams={diagrams}/>
+            <DiagramTabs diagrams={diagrams}/>
         }
       </Grid>
     </Grid>

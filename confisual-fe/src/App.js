@@ -1,5 +1,5 @@
 import './App.css';
-import Visualiser from "./components/Visualiser";
+import Visualiser from "./components/Visualiser/Visualiser";
 import { Grid, Typography } from "@material-ui/core";
 import React, { useState } from 'react';
 import Drawer from '@material-ui/core/Drawer';
